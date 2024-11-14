@@ -1,7 +1,18 @@
-import math
 import random
+import math
 import time
 from shapely.geometry import Polygon, Point
+
+
+def polygon_area(coords):
+    """Calculating the area of a polygon using the Gauss method."""
+    n = len(coords)
+    area = 0
+    for i in range(n):
+        x1, y1 = coords[i]
+        x2, y2 = coords[(i + 1) % n]
+        area += x1 * y2 - x2 * y1
+    return abs(area) / 2
 
 
 def monte_carlo_area(polygon, num_points):
@@ -60,12 +71,22 @@ def find_iterations_for_accuracy(polygon, acceptable_error=0.01, max_iter=1_000_
     return num_points, elapsed_time
 
 
-# Example usage
 if __name__ == "__main__":
     polygon = generate_polygon(100)
     print(f"Generated Polygon: {polygon}")
-    print(f"True Area: {polygon.area:.5f}")
     
+    # Calculate true area using Shapely
+    true_area = polygon.area
+    print(f"True Area (Shapely): {true_area:.5f}")
+    
+    # Calculate area using Gauss method
+    coords = list(polygon.exterior.coords)
+    gauss_area = polygon_area(coords)
+    print(f"Area using Gauss method: {gauss_area:.5f}")
+    
+    # Estimate area using Monte Carlo method
     min_points, execution_time = find_iterations_for_accuracy(polygon, acceptable_error=0.01)
-    print(f"\nMinimum Points Required: {min_points}")
+    monte_carlo_estimate = monte_carlo_area(polygon, min_points)
+    print(f"\nMonte Carlo Estimate: {monte_carlo_estimate:.5f}")
+    print(f"Minimum Points Required: {min_points}")
     print(f"Execution Time: {execution_time:.2f} seconds")
